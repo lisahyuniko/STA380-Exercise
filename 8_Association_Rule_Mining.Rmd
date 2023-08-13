@@ -1,0 +1,131 @@
+---
+title: "8_Association_Rule_Mining"
+output: pdf_document
+date: "2023-08-13"
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r}
+groceries = read.csv('~/STA380-Exercise/datafile/groceries.txt', header = FALSE)
+```
+
+```{r}
+library(arules)
+
+# Replace empty cells with NA
+groceries[groceries == ""] <- NA
+
+# Create baskets by removing NA values
+baskets <- lapply(1:nrow(groceries), function(row) {
+  basket <- unlist(groceries[row, ])
+  basket <- basket[!is.na(basket)]
+  basket
+})
+
+# Convert baskets to transactions
+gtrans <- as(baskets, "transactions")
+
+# Display summary of transactions
+summary(gtrans)
+```
+
+The data consists of 15,296 shopping baskets (transactions) and 169
+unique items (columns). The density of the data indicates that, on
+average, each transaction contains approximately 1.68% of the total
+available items.
+
+```{r}
+
+# Item frequency plot
+itemFrequencyPlot(
+  gtrans, topN = 20,
+  type = 'relative',
+)
+```
+
+Frequent Items: Among the most frequent items, we find that "whole
+milk," "other vegetables," "rolls/buns," "soda," and "yogurt" dominate
+the baskets. These items are commonly purchased by the customers.
+
+Transaction Length Distribution: The distribution of transaction lengths
+provides an overview of the number of items per basket. It appears that:
+
+3,485 baskets contain 1 item, 2,630 baskets contain 2 items 2,102
+baskets contain 3 items, 7,079 baskets contain 4 items Item
+
+Labels: We also have additional information about some of the items. For
+instance, we can see examples of items like "abrasive cleaner,"
+"artificial sweetener," and "baby cosmetics."
+
+### Finding interesting association rules
+
+```{r}
+# Perform association rule mining using Apriori algorithm
+grocr <- apriori(gtrans, 
+                 parameter = list(support = 0.005, confidence = 0.1, maxlen = 4))
+
+# Display summary of the mined rules
+summary(grocr)
+```
+
+Rule Characteristics: The Apriori algorithm discovered a total of 118
+association rules, characterized by varying lengths of items on both the
+left-hand side (lhs) and right-hand side (rhs) of the rules. These rules
+provide insights into how items are related in the context of grocery
+shopping baskets.
+
+Support: The minimum support for an item set is approximately 0.5%,
+indicating that a rule is relevant if it appears in at least this
+proportion of transactions.
+
+Confidence: The minimum confidence threshold is set at 10%, meaning that
+a rule should have a confidence level of at least this value to be
+considered significant.
+
+Coverage: The coverage reflects the proportion of transactions covered
+by the rule.
+
+Lift: The lift measures the strength of the association between the
+items in the rule. A lift greater than 1.0 indicates a positive
+association.
+
+```{r}
+# Filter rules based on lift threshold
+high_lift_rules <- subset(grocr, subset = lift > 2.5)
+
+# Display and interpret the high lift rules
+inspect(high_lift_rules)
+
+```
+
+These high lift association rules provide a glimpse into intriguing
+purchasing patterns. Connection between onions and root vegetables
+suggests that customers who buy onions are likely to purchase other root
+vegetables and other vegetables as well. Beef buyers also show an
+interest in citrus fruit and root vegetables.
+
+Picking Thresholds: I set a minimum confidence threshold of 10% and a
+minimum lift threshold of 2.5. Confidence Threshold: The confidence
+threshold of 10% was chosen to identify rules where the consequent (rhs)
+appears in at least 10% of transactions containing the antecedent (lhs).
+Lift Threshold: A lift value of 2.5 implies that the items are 2.5 times
+more likely to be bought together than expected by chance.
+
+```{r}
+# Load necessary packages for visualization
+library(arulesViz)
+
+# Visualize the high lift rules, including weaker associations
+plot(high_lift_rules, method = "graph", control = list(type = "items", shading = "lift"))
+
+```
+
+In the graph, each item is represented as a node (circle). These nodes
+are interconnected by edges (lines), illustrating the linkages between
+items based on the high lift association rules.
+
+The direction of the arrows on the edges indicates the direction of
+association between items. For example, customers who buy whole milk are
+more likely to also purchase vegetables.
