@@ -127,5 +127,12 @@ are interconnected by edges (lines), illustrating the linkages between
 items based on the high lift association rules.
 
 The direction of the arrows on the edges indicates the direction of
-association between items. For example, customers who buy whole milk are
-more likely to also purchase vegetables.
+association between items. For instance, customers who purchase whole milk are inclined to also buy vegetables. 
+On the right-hand side, distinct clusters of fruits emerge, categorized as tropical, citrus, and pip. 
+This alignment is logical, as these fruits tend to be grouped together and are often selected by shoppers as complementary choices.
+Sausages, onions, and various vegetables are in proximity, indicating a likelihood of concurrent purchase.
+This proximity implies a shared association, since it is common to include these items in dinner preparations.
+
+
+
+
